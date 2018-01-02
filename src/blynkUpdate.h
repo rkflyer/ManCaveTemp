@@ -17,17 +17,17 @@ void blynkLiveUpdate()
         Blynk.virtualWrite(V32, probe4);
 
 
+// Publish temps to MQTT Server
 
+snprintf (msg, 25,"%3.4f", probe1);
+client.publish("manCave/probe1", msg);
 
-//client.setServer(mqtt_server, 1883);
-//client.connect("ESP8266Client");
-//delay(5000);
+snprintf (msg, 25,"%3.4f", probe2);
+client.publish("manCave/probe2", msg);
 
-//snprintf (msg, 75, "hello world #%ld", temp1);
-//client.publish("dev8266/temp1", probe1);
-//client.publish("dev8266/temp2", temp2);
-//client.publish("dev8266/hum", hum);
-//client.publish("dev8266/volts", volts);
+snprintf (msg, 25,"%3.4f", probe3);
+client.publish("manCave/probe3", msg);
+
 
 
 

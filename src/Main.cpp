@@ -28,8 +28,14 @@
 #include <EEPROM.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <PubSubClient.h>
 
 
+// Update these with values suitable for your network.
+
+const char* mqtt_server = "192.168.1.171";
+WiFiClient espClient;
+PubSubClient client(espClient);
 
 WiFiServer TelnetServer(23);
 WiFiClient Telnet;
@@ -72,6 +78,7 @@ int displayTimerID;
 int eeprom;
 int DEBUG = 0;
 char TelnetInput;
+char msg[25];
 //char msgTxt;
 
 
@@ -97,14 +104,6 @@ String timeNow;
 String mins;
 String sec;
 const int sleepTimeS = 10;
-
-
-
-WiFiUDP Udp;
-unsigned int localPort = 8888;  // local port to listen for UDP packets
-
-time_t getNtpTime();
-void sendNTPpacket(IPAddress &address);
 
 
 
@@ -160,6 +159,56 @@ U8G2_SH1106_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA
 
 // Blynk App Auth Token
 char auth[] = "e5f5f07a0189470c8970a1736ae1f032";
+
+
+
+
+
+// Deal with incoming MQTT
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+}
+
+//Connect/Reconnect MQTT Server and Subscribe to topics
+  void reconnect() {
+    // Loop until we're reconnected
+    while (!client.connected()) {
+      Serial.print("Attempting MQTT connection...");
+      // Attempt to connect
+      if (client.connect("ESP8266Client")) {
+        Serial.println("connected");
+
+
+
+        // Once connected, publish an announcement...
+        client.publish("outTopic", "MQQT Has started......");
+
+
+        // ... and subscribe/resubscribe
+        client.subscribe("inTopic");
+
+
+      } else {
+        Serial.print("failed, rc=");
+        Serial.print(client.state());
+        Serial.println(" try again in 5 seconds");
+        // Wait 5 seconds before retrying
+        delay(5000);
+      }
+    }
+  }
+
+
+
+
+
+
 
 
 
@@ -326,11 +375,8 @@ void setup() {
         screenMsg("Starting MQTT");
 // Setup MQTT
 
-
-
-
   client.setServer(mqtt_server, 1883);
- // client.setCallback(callback);
+  client.setCallback(callback);
   client.connect("ESP8266Client");
   // Once connected, publish an announcement...
   client.publish("outTopic", "MQQT Has started......");
@@ -360,6 +406,13 @@ void loop() {
 
         // Run Blynk main routine
         Blynk.run();
+
+
+        // Run MQQT Loop
+        if (!client.connected()) {
+                reconnect();
+        }     
+        client.loop();
  
         // Timer loop
         timer.run();
