@@ -111,18 +111,6 @@ void sendNTPpacket(IPAddress &address);
 char myIpString[24];
  #define led 2
 
-//#include <Wire.h>
-//#include <EEPROM.h>
-//#include <RTClib.h>
-#include <Time.h>
-
-
-
-//#include <ntpcheck.h>
-//ntpCheck gettime;
-static const char ntpServerName[] = "us.pool.ntp.org";
-const int timeZone = 1;     // Central European Time
-
 
 //Simple timer library and instance called 'timer'
 #include <SimpleTimer.h>
@@ -146,11 +134,6 @@ DallasTemperature sensors(&oneWire);
 
 
 
-// Spare sensor in travel kit
-// Assign the addresses of 1-Wire temp sensors.
-//DeviceAddress Probe01 = { 0x28, 0xCF, 0xF7, 0x37, 0x05, 0x00, 0x00, 0xA9 };
-//DeviceAddress Probe02 = { 0x28, 0xCF, 0xF7, 0x37, 0x05, 0x00, 0x00, 0xA9 };
-//DeviceAddress Probe03 = { 0x28, 0xCF, 0xF7, 0x37, 0x05, 0x00, 0x00, 0xA9 };
 
 // Shed Sensors as Installed
 DeviceAddress Probe01 = { 0x28, 0x1E, 0x18, 0x38, 0x05, 0x00, 0x00, 0x75 };
@@ -174,19 +157,8 @@ U8G2_SH1106_128X64_NONAME_1_SW_I2C u8g2(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA
 #include "displayFrames.h"
 #include "tempUpdate.h"
 
-/*
- #include "eepromGetSend.h"
- #include "heaterControl.h"
- #include "blynkUpdate.h"
- #include "miscFunctions.h"
- #include "displayFrames.h"
- #include "tempUpdate.h"
- */
-
 
 // Blynk App Auth Token
-//char auth[] = "5ca54a7d4af84eb294f72282e374eb9f";
-//char auth[] = "3d3dbd28d15845c892bbd18bf3dfe428";
 char auth[] = "e5f5f07a0189470c8970a1736ae1f032";
 
 
@@ -218,10 +190,6 @@ void setup() {
 
 
         screenMsg("Setting Outputs");
-// Set external VCC reference
-//  analogReference(EXTERNAL);
-
-
 
         pinMode(16,OUTPUT); // Heaters
         pinMode(14,OUTPUT); // Fan Heater
@@ -264,9 +232,6 @@ void setup() {
         delay (3000);
         // Start Blynk and login to Wifi
 
-        //Blynk.begin(auth, "RicHAP", "22816238", "185.46.208.6");
-//Blynk.begin(auth, "HOGBROOK6", "E933763592", "185.46.208");
-//Blynk.begin(auth, "RicAP", "", "185.46.208.6");
         screenMsg("Connecting Blynk");
         delay(2000);
         displayOff();
@@ -321,30 +286,6 @@ void setup() {
         });
 
 
-/*
-   ArduinoOTA.onStart([]() { // switch off all the PWMs during upgrade
-                        for(int i=0; i<N_DIMMERS;i++)
-                          analogWrite(dimmer_pin[i], 0);
-                          analogWrite(led_pin,0);
-                    });
-
-   ArduinoOTA.onEnd([]() { // do a fancy thing with our board led at end
-                          for (int i=0;i<30;i++)
-                          {
-                            analogWrite(led_pin,(i*100) % 1001);
-                            delay(50);
-                          }
-                        });
-
-   ArduinoOTA.onError([](ota_error_t error) { ESP.restart(); });
-
-
- */
-
-
-
-
-
 
         ArduinoOTA.begin();
         Serial.println("Ready");
@@ -358,23 +299,6 @@ void setup() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-// Setup output pins
-
-//    DDRB |= (1<<PB1);
-//    DDRB |= (1<<PB2);
-//   pinMode(9, OUTPUT);
-//   pinMode(10, OUTPUT);
-
         screenMsg("Starting Sensors");
 // Start one wire sensors
         sensors.begin();
@@ -384,13 +308,6 @@ void setup() {
         sensors.setResolution(Probe02, 12);
         sensors.setResolution(Probe03, 12);
 
-// Start the Hardware Serialport
-// Serial.begin(9600);
-// delay(10);
-
-// set the data rate for the SoftwareSerial port
-//    EspSerial.begin(9600);
-//    delay(10);
 
 
         screenMsg("Setting Timers");
@@ -421,24 +338,6 @@ void setup() {
 //  client.subscribe("inTopic");
 
 
-//Get NTP time
- //       screenMsg("Getting Time");
-
-
-//epoch = gettime.getTime();
-//  setSyncProvider(epoch);
-// setSyncInterval(300);
-        //rtc.adjust(epoch);
-       // Udp.begin(localPort);
-       // setSyncProvider(getNtpTime);
-       // setSyncInterval(300);
-
-
-
-        //PrintDateTime(rtc.now());
-        //Serial.println("Time Now..");
-        //Serial.print(hour());
-        //Serial.print(minute());
 
 
 
@@ -456,19 +355,12 @@ void setup() {
 void loop() {
 
         ArduinoOTA.handle();
-
+        // Deal with Telnet connections
         handleTelnet();
 
-        //Serial.println(remainingTimeBudget);
-//delay (30000);
         // Run Blynk main routine
         Blynk.run();
-        //MQTTPublish();
-
-        //Serial.println("ESP8266 in sleep mode");
-        //ESP.deepSleep(sleepTimeS * 1000000);
-        //Serial.println("ESP8266 in awake");
-
+ 
         // Timer loop
         timer.run();
         //End Main Loop

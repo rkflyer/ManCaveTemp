@@ -24,7 +24,7 @@ void blynkLiveUpdate()
 //delay(5000);
 
 //snprintf (msg, 75, "hello world #%ld", temp1);
-client.publish("dev8266/temp1", probe1);
+//client.publish("dev8266/temp1", probe1);
 //client.publish("dev8266/temp2", temp2);
 //client.publish("dev8266/hum", hum);
 //client.publish("dev8266/volts", volts);
